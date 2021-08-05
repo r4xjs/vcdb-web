@@ -1,0 +1,5 @@
+build/*
+/.emacs-packages/
+/.org-cache/
+/roam.db
+/test-dir/

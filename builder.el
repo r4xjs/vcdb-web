@@ -1,5 +1,25 @@
+;;;; Config Variables
+
+(defvar raxjs/description-index-page "
+f00 bar
+
+lallala
+
+lsl
+"
+  "The text that is shown on the index.html page under the Description section")
+
+(defvar raxjs/generate-out-dir ".generate"
+  "Temp directory that is used for then index.org and $tag.org files")
+
+(defvar raxjs/input-dir "./test-dir/"
+  "The directory where your org files life")
+
+(defvar raxjs/out-dir "./build/"
+  "The directory where your generated html files life")
 
 ;;;; Install Dependencies
+
 (require 'package)
 (setq package-enable-at-startup nil)
 (setq use-package-verbose nil)
@@ -24,7 +44,7 @@
   :init
     (setq org-roam-v2-ack t)
   :config
-    (setq org-roam-directory (expand-file-name "test-dir")
+    (setq org-roam-directory (expand-file-name raxjs/input-dir)
 	org-roam-db-location "./roam.db")
     (org-roam-db-sync))
 
@@ -51,14 +71,14 @@
       )
 
 (setq org-publish-project-alist
-      '(
+      `(
 	("org" :components ("vcdb" "static" "generate"))
 
 
        ("vcdb"
-        :base-directory "test-dir/"
+        :base-directory ,(expand-file-name raxjs/input-dir)
         :base-extension "org"
-        :publishing-directory "build/vcdb/"
+        :publishing-directory ,(format "%svcdb/" (expand-file-name raxjs/out-dir))
         :recursive t
         :publishing-function ox-slimhtml-publish-to-html 
         :headline-levels 4 
@@ -73,9 +93,9 @@
         )
 
        ("generate"
-        :base-directory ".generate/"
+        :base-directory ,(expand-file-name raxjs/generate-out-dir)
         :base-extension "org"
-        :publishing-directory "build/"
+        :publishing-directory ,(expand-file-name raxjs/out-dir)
         :recursive t
         :publishing-function ox-slimhtml-publish-to-html 
         :headline-levels 4 
@@ -93,7 +113,7 @@
       ("static"
 	:base-directory "static/"
 	:base-extension "css\\|js\\|png\\|jpg\\|gif"
-	:publishing-directory "build/"
+	:publishing-directory ,(expand-file-name raxjs/out-dir)
 	:recursive t
 	:publishing-function org-publish-attachment
     
@@ -104,17 +124,19 @@
 
 ;;;; Generation of index and tag files via org-roam-node-* infos
 
-(setq raxjs/generate-out-dir ".generate")
 
-(defun raxjs/roam-tag-list ()
-    (interactive)
+(defun raxjs/tag-list-filter (tag-list)
     (seq-filter
 	(lambda (el)
 	  (when (not (or (string= el "vcdb")
-			 (string= el "nosolution")
 			 ))
 	    el
 	   ))
+	tag-list))
+
+(defun raxjs/roam-tag-list ()
+    (interactive)
+    (raxjs/tag-list-filter
 	(seq-uniq
 	    (flatten-list
 		(mapcar 'org-roam-node-tags (org-roam-node-list))))))
@@ -131,6 +153,8 @@
     tag-dict))
 
 
+(defun raxjs/tag-link (tag)
+    (format "- [[file:tag_%s.html][%s]]\n" tag tag))
 
 (defun raxjs/generate-index-file ()
     (save-current-buffer
@@ -141,16 +165,22 @@
 	    (goto-char (point-min))
 
 	    ;; write stuff to tmp buffer
-	    (insert "* Description
-balalbalblabla
-blablalb 
-ablalb
-
-* Tags
-")
+	    (insert (format "* Description\n %s" raxjs/description-index-page))
+	    (insert "\n* Challenges\n")
+	    (dolist (node (org-roam-node-list))
+	      (insert (format "- [[file:vcdb/%s.html][%s]] \n\t%s\n"
+			      (file-name-base (org-roam-node-file node))
+			      (org-roam-node-title node)
+			      (string-join (mapcar
+					    'raxjs/tag-link
+					    (raxjs/tag-list-filter
+					       (org-roam-node-tags node))) "\n\t")
+			      ))
+	      )
+	    (insert "\n* Tags\n")
 	    (let ((tag-list (raxjs/roam-tag-list)))
 		(dolist (tag tag-list)
-		    (insert (format "- [[file:tag_%s.html][%s]]\n" tag tag))
+		    (insert (raxjs/tag-link tag))
 		    ))
 	    (write-file (concat (expand-file-name raxjs/generate-out-dir) "/index.org"))
 	    (kill-buffer)
@@ -167,15 +197,9 @@ ablalb
 	    (save-excursion
 	    (delete-region (point-min) (point-max))
 	    (goto-char (point-min))
-
+	    (insert (format "* %s\n" tag))
 	    ;; write stuff to tmp buffer
-	    (insert "* Description
-balalbalblabla
-blablalb 
-ablalb
-
-* Tags
-")
+	    (insert "** Challenges\n")
 
 	  ;; iter over all nodes that have a given tag 
 	  ;; and write a link to that node (challenge file)

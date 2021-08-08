@@ -3,3 +3,4 @@ build/*
 /.org-cache/
 /roam.db
 /test-dir/
+public/*

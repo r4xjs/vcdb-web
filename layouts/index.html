@@ -12,10 +12,10 @@
 
 <tbody>
 
-{{ range $tag, $page := .Site.Taxonomies.tags }}
+{{ range .Site.Taxonomies.tags.ByCount }}
 <tr>
-  <td><a href="/tags/{{ $tag }}">{{ $tag }}</a></td>
-  <td>{{ $page.Count }}</td>
+  <td><a href="tags/{{ .Name }}/">{{ .Name }}</a></td>
+  <td>{{ .Count }}</td>
 </tr>
 {{ end }}
 </tbody>

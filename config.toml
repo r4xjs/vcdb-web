@@ -44,7 +44,7 @@ paginate = 50
 [[menu.main]]
     identifier = "rss"
     name = "RSS"
-    url = "/rss/"
+    url = "/vcdb/index.xml"
     weight = 40
 [[menu.main]]
     identifier = "credit"
@@ -52,3 +52,5 @@ paginate = 50
     url = "/credit/"
     weight = 50
 
+[sitemap]
+filename = 'sitemap.xml'

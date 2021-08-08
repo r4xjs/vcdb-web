@@ -1,0 +1,31 @@
+{{ define "main" }}
+{{ .Content }}
+
+<h4>Challenges grouped by tag:</h4>
+<table>
+<thead>
+<tr>
+<th>Challenge Tag</th>
+<th>Number of Challenges</th>
+</tr>
+</thead>
+
+<tbody>
+
+{{ range $tag, $page := .Site.Taxonomies.tags }}
+<tr>
+  <td><a href="/tags/{{ $tag }}">{{ $tag }}</a></td>
+  <td>{{ $page.Count }}</td>
+</tr>
+{{ end }}
+</tbody>
+</table>
+
+{{ $challenge_count := 0 }}
+{{ range readDir "content/vcdb" }}
+   {{ $challenge_count = add $challenge_count 1 }}
+{{ end }}
+<h4>Overall number of challenges: {{ $challenge_count }}</h4>
+
+
+{{ end }}

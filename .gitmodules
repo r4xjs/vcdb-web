@@ -1,3 +1,7 @@
 [submodule "content/vcdb"]
 	path = content/vcdb
 	url = https://github.com/r4xjs/vcdb
+
+[submodule "themes/terminal"]
+    path = themes/terminal
+    url = https://github.com/panr/hugo-theme-terminal

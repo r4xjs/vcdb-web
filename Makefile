@@ -11,8 +11,6 @@ build:
 	chmod -R o+r public
 
 update:
-	cd content/vcdb
-	git pull origin master
-	cd ../..
+	cd content/vcdb; git pull origin master
 push:
 	rsync -arvpsS ./public/ $(WWW):/var/www/vcdb/
